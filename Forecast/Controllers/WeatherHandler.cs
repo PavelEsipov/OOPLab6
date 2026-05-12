@@ -24,12 +24,17 @@ public class WeatherHandler(IEnumerable<IWeatherDataClient> clients)
         return new CurrentWeather(temperature);
     }
 
-    public Task<IEnumerable<ForecastWeather>> GetForecast(
+    public async Task<IEnumerable<ForecastWeather>> GetForecast(
         WeatherProvider provider,
         decimal latitude,
         decimal longitude
     )
     {
-        throw new NotImplementedException();
+        if (!providers.TryGetValue(provider, out var client))
+        {
+            throw new InvalidOperationException($"Provider {provider} not found");
+        }
+
+        return await client.LocationForecast(latitude, longitude);
     }
 }

@@ -24,7 +24,7 @@ public class OpenWeatherDataClient : IWeatherDataClient
         try
         {
             var response = await client.GetAsync(
-                $"?lat={latitude}&lon={longitude}&appid={apiKey}&units=metric"
+                $"weather?lat={latitude}&lon={longitude}&appid={apiKey}&units=metric"
             );
 
             if (!response.IsSuccessStatusCode)
@@ -48,9 +48,56 @@ public class OpenWeatherDataClient : IWeatherDataClient
         }
     }
 
-    public Task<IEnumerable<ForecastWeather>> LocationForecast(decimal latitude,decimal longitude)
+    public async Task<IEnumerable<ForecastWeather>> LocationForecast(
+        decimal latitude,
+        decimal longitude
+    )
     {
-        throw new NotImplementedException();
+        try
+        {
+            var response = await client.GetAsync(
+                $"forecast?lat={latitude}&lon={longitude}&appid={apiKey}&units=metric"
+            );
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new ApiCallException(
+                    $"openweather returned bad status: {(ushort)response.StatusCode}"
+                );
+            }
+
+            var data = await response.Content.ReadFromJsonAsync<OpenWeatherForecastResponse>();
+
+            if (data?.List == null)
+                return [];
+
+            var grouped = data.List
+                .GroupBy(x => DateTime.Parse(x.DtTxt).Date)
+                .Select(g =>
+                {
+                    var min = g.Min(x => x.Main.TempMin);
+                    var max = g.Max(x => x.Main.TempMax);
+                    var description = g.First().Weather.FirstOrDefault()?.Description ?? "";
+
+                    return new ForecastWeather(
+                        DateOnly.FromDateTime(g.Key),
+                        min,
+                        max,
+                        description
+                    );
+                })
+                .Take(5);
+
+            return grouped;
+        }
+        catch (HttpRequestException e)
+        {
+            throw new ApiCallException($"failed to call openweather: {e.Message}", e);
+        }
+        catch (JsonException e)
+        {
+            throw new ApiCallException($"invalid openweather response", e);
+        }
     }
 }
 
@@ -63,5 +110,38 @@ class OpenWeatherResponse
     {
         [JsonPropertyName("temp")]
         public decimal Temp { get; set; }
+    }
+}
+
+class OpenWeatherForecastResponse
+{
+    [JsonPropertyName("list")]
+    public List<Item> List { get; set; } = [];
+
+    public class Item
+    {
+        [JsonPropertyName("dt_txt")]
+        public string DtTxt { get; set; } = "";
+
+        [JsonPropertyName("main")]
+        public MainData Main { get; set; } = new();
+
+        [JsonPropertyName("weather")]
+        public List<WeatherData> Weather { get; set; } = [];
+    }
+
+    public class MainData
+    {
+        [JsonPropertyName("temp_min")]
+        public decimal TempMin { get; set; }
+
+        [JsonPropertyName("temp_max")]
+        public decimal TempMax { get; set; }
+    }
+
+    public class WeatherData
+    {
+        [JsonPropertyName("description")]
+        public string Description { get; set; } = "";
     }
 }

@@ -14,4 +14,13 @@ class CurrentWeatherController(WeatherHandler handler)
     {
         return handler.GetCurrentWeather(provider, latitude, longitude);
     }
+
+    public Task<IEnumerable<ForecastWeather>> GetForecast(
+        WeatherProvider provider,
+        decimal latitude,
+        decimal longitude
+    )
+    {
+        return handler.GetForecast(provider, latitude, longitude);
+    }
 }

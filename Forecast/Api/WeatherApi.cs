@@ -22,6 +22,18 @@ public static class WeatherApi
         return groups;
     }
 
+    public static RouteGroupBuilder MapForecastApi(this RouteGroupBuilder groups)
+    {
+        groups
+            .MapGet("forecast", WeatherApi.HandleGetForecast)
+            .WithName("GetForecast")
+            .WithDisplayName("Get Forecast")
+            .WithTags(["weather"])
+            .WithDescription("Returns weather forecast for given coordinates");
+
+        return groups;
+    }
+
     private static async Task<
         Results<Ok<Success<CurrentWeather>>, BadRequest<Status>, InternalServerError<Status>>
     > HandleGetCurrentWeather(
@@ -39,6 +51,38 @@ public static class WeatherApi
             var weather = await controller.GetCurrentWeather(provider, latitude, longitude);
 
             return TypedResults.Ok(Success.Create(200, "success", weather));
+        }
+        catch (FormatException)
+        {
+            return TypedResults.BadRequest(Status.Create(400, "invalid coordinates"));
+        }
+        catch (OverflowException)
+        {
+            return TypedResults.BadRequest(Status.Create(400, "invalid coordinates"));
+        }
+        catch (ApiCallException e)
+        {
+            return TypedResults.InternalServerError(Status.Create(500, e.Message));
+        }
+    }
+
+    private static async Task<
+    Results<Ok<Success<IEnumerable<ForecastWeather>>>, BadRequest<Status>, InternalServerError<Status>>
+    > HandleGetForecast(
+        [FromServices] CurrentWeatherController controller,
+        [FromQuery] WeatherProvider provider,
+        [DefaultValue("18.300231990440125")] string lat,
+        [DefaultValue("-64.8251590359234")] string lon
+    )
+    {
+        try
+        {
+            var latitude = decimal.Parse(lat);
+            var longitude = decimal.Parse(lon);
+
+            var forecast = await controller.GetForecast(provider, latitude, longitude);
+
+            return TypedResults.Ok(Success.Create(200, "success", forecast));
         }
         catch (FormatException)
         {
