@@ -52,6 +52,11 @@ public class GoogleWeatherDataClient : IWeatherDataClient
             throw new ApiCallException("failed to decode response", e);
         }
     }
+
+    public Task<IEnumerable<ForecastWeather>> LocationForecast(decimal latitude,decimal longitude)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 class GoogleWeatherResponse

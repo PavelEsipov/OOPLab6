@@ -23,4 +23,13 @@ public class WeatherHandler(IEnumerable<IWeatherDataClient> clients)
 
         return new CurrentWeather(temperature);
     }
+
+    public Task<IEnumerable<ForecastWeather>> GetForecast(
+        WeatherProvider provider,
+        decimal latitude,
+        decimal longitude
+    )
+    {
+        throw new NotImplementedException();
+    }
 }
