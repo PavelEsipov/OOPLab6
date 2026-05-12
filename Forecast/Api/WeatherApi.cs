@@ -26,6 +26,7 @@ public static class WeatherApi
         Results<Ok<Success<CurrentWeather>>, BadRequest<Status>, InternalServerError<Status>>
     > HandleGetCurrentWeather(
         [FromServices] CurrentWeatherController controller,
+        [FromQuery] WeatherProvider provider,
         [DefaultValue("18.300231990440125")] string lat,
         [DefaultValue("-64.8251590359234")] string lon
     )
@@ -35,7 +36,7 @@ public static class WeatherApi
             var latitude = decimal.Parse(lat);
             var longitude = decimal.Parse(lon);
 
-            var weather = await controller.GetCurrentWeather(latitude, longitude);
+            var weather = await controller.GetCurrentWeather(provider, latitude, longitude);
 
             return TypedResults.Ok(Success.Create(200, "success", weather));
         }

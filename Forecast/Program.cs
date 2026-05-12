@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using DotEnv.Core;
 using Forecast.Api;
 using Forecast.Clients;
@@ -17,8 +18,21 @@ builder.Services.AddOpenApiDocument(config =>
     config.Title = "Weather Example API";
     config.Version = "v1";
 });
+
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(
+        new JsonStringEnumConverter()
+    );
+});
+
 builder.Services.AddHttpClient<OpenWeatherDataClient>();
+builder.Services.AddHttpClient<GoogleWeatherDataClient>();
+
 builder.Services.AddSingleton<IWeatherDataClient, OpenWeatherDataClient>();
+builder.Services.AddSingleton<IWeatherDataClient, GoogleWeatherDataClient>();
+
+builder.Services.AddSingleton<WeatherHandler>();
 builder.Services.AddSingleton<CurrentWeatherController>();
 
 var app = builder.Build();
