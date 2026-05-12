@@ -1,9 +1,10 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Forecast.Utils;
 
 namespace Forecast.Clients;
 
-class OpenWeatherDataClient : IWeatherDataClient
+public class OpenWeatherDataClient : IWeatherDataClient
 {
     private readonly HttpClient client;
     private readonly string apiKey;
@@ -31,11 +32,16 @@ class OpenWeatherDataClient : IWeatherDataClient
             }
 
             var data = await response.Content.ReadFromJsonAsync<OpenWeatherResponse>();
+
             return data?.Main?.Temp ?? throw new ApiCallException($"failed to decode response");
         }
         catch (HttpRequestException e)
         {
             throw new ApiCallException($"failed to call openweather: {e.Message}.", inner: e);
+        }
+        catch (JsonException e)
+        {
+            throw new ApiCallException("failed to decode response", e);
         }
     }
 }
