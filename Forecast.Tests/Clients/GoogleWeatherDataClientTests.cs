@@ -46,7 +46,9 @@ public class GoogleWeatherDataClientTests
                     Content = new StringContent(
                         """
                         {
-                            "temperature": 30.5
+                            "temperature": {
+                                "degrees": 30.5
+                            }
                         }
                         """,
                         Encoding.UTF8,
@@ -57,7 +59,7 @@ public class GoogleWeatherDataClientTests
 
         var httpClient = new HttpClient(handlerMock.Object);
 
-        var client = new GoogleWeatherDataClient();
+        var client = new GoogleWeatherDataClient(configuration, httpClient);
 
         // Act
         var result = await client.LocationCurrentTemperature(10m, 20m);
@@ -89,7 +91,7 @@ public class GoogleWeatherDataClientTests
 
         var httpClient = new HttpClient(handlerMock.Object);
 
-        var client = new GoogleWeatherDataClient();
+        var client = new GoogleWeatherDataClient(configuration, httpClient);
 
         // Act & Assert
         await Assert.ThrowsAsync<ApiCallException>(() =>
@@ -125,7 +127,7 @@ public class GoogleWeatherDataClientTests
 
         var httpClient = new HttpClient(handlerMock.Object);
 
-        var client = new GoogleWeatherDataClient();
+        var client = new GoogleWeatherDataClient(configuration, httpClient);
 
         // Act & Assert
         await Assert.ThrowsAsync<ApiCallException>(() =>
@@ -151,7 +153,7 @@ public class GoogleWeatherDataClientTests
 
         var httpClient = new HttpClient(handlerMock.Object);
 
-        var client = new GoogleWeatherDataClient();
+        var client = new GoogleWeatherDataClient(configuration, httpClient);
 
         // Act & Assert
         await Assert.ThrowsAsync<ApiCallException>(() =>
@@ -190,7 +192,7 @@ public class GoogleWeatherDataClientTests
             );
 
         var httpClient = new HttpClient(handlerMock.Object);
-        var client = new GoogleWeatherDataClient();
+        var client = new GoogleWeatherDataClient(configuration, httpClient);
 
         // Act & Assert
         await Assert.ThrowsAsync<ApiCallException>(() =>
