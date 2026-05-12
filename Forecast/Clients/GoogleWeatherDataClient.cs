@@ -1,11 +1,14 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Forecast.Utils;
+using Forecast.Models.Weather;
 
 namespace Forecast.Clients;
 
 public class GoogleWeatherDataClient : IWeatherDataClient
 {
+    public WeatherProvider Provider => WeatherProvider.GoogleWeather;
+
     private readonly HttpClient client;
     private readonly string apiKey;
 

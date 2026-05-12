@@ -3,7 +3,7 @@ using Forecast.Models.Weather;
 
 namespace Forecast.Controllers;
 
-class CurrentWeatherController(IWeatherDataClient client)
+public class CurrentWeatherController(IWeatherDataClient client)
 {
     private readonly IWeatherDataClient client = client;
 

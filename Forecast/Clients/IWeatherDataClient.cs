@@ -1,6 +1,10 @@
+using Forecast.Models.Weather;
+
 namespace Forecast.Clients;
 
-interface IWeatherDataClient
+public interface IWeatherDataClient
 {
+    public WeatherProvider Provider { get; }
+
     Task<decimal> LocationCurrentTemperature(decimal latitude, decimal longitude);
 }
