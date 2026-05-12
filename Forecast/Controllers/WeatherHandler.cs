@@ -37,4 +37,12 @@ public class WeatherHandler(IEnumerable<IWeatherDataClient> clients)
 
         return await client.LocationForecast(latitude, longitude);
     }
+
+    public Task<IEnumerable<CurrentWeather>> GetCurrentWeatherMultiple(
+        WeatherProvider provider,
+        IEnumerable<LocationDto> locations
+    )
+    {
+        throw new NotImplementedException();
+    }
 }
