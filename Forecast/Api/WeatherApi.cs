@@ -51,6 +51,17 @@ public static class WeatherApi
         return groups;
     }
 
+    public static RouteGroupBuilder MapCityWeatherApi(this RouteGroupBuilder groups)
+    {
+        groups
+            .MapGet("weather/by-city", HandleGetWeatherByCity)
+            .WithName("GetWeatherByCity")
+            .WithTags(["weather"])
+            .WithDescription("Returns weather for a single city");
+
+        return groups;
+    }
+
     private static async Task<
         Results<Ok<Success<CurrentWeather>>, BadRequest<Status>, InternalServerError<Status>>
     > HandleGetCurrentWeather(
@@ -144,6 +155,36 @@ public static class WeatherApi
         {
             return TypedResults.InternalServerError(
                 Status.Create(500, e.Message)
+            );
+        }
+    }
+
+    private static async Task<
+    Results<Ok<Success<CurrentWeather>>, BadRequest<Status>, InternalServerError<Status>>
+    > HandleGetWeatherByCity(
+        [FromServices] WeatherHandler handler,
+        [FromQuery] WeatherProvider provider,
+        [FromQuery] City city
+    )
+    {
+        try
+        {
+            var result = await handler.GetWeatherByCity(provider, city);
+
+            return TypedResults.Ok(
+                Success.Create(200, "success", result)
+            );
+        }
+        catch (ApiCallException e)
+        {
+            return TypedResults.InternalServerError(
+                Status.Create(500, e.Message)
+            );
+        }
+        catch (InvalidOperationException e)
+        {
+            return TypedResults.BadRequest(
+                Status.Create(400, e.Message)
             );
         }
     }

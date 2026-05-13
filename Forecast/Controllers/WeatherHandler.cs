@@ -8,6 +8,15 @@ public class WeatherHandler(IEnumerable<IWeatherDataClient> clients)
     private readonly Dictionary<WeatherProvider, IWeatherDataClient> providers =
         clients.ToDictionary(x => x.Provider, x => x);
 
+    private static readonly Dictionary<City, (decimal lat, decimal lon)> cityMap = new()
+    {
+        { City.Minsk, (53.9m, 27.5667m) },
+        { City.London, (51.5074m, -0.1278m) },
+        { City.Tokyo, (35.6895m, 139.6917m) },
+        { City.Shanghai, (31.2304m, 121.4737m) },
+        { City.Warsaw, (52.2297m, 21.0122m) }
+    };
+
     public async Task<CurrentWeather> GetCurrentWeather(
         WeatherProvider provider,
         decimal latitude,
@@ -61,11 +70,26 @@ public class WeatherHandler(IEnumerable<IWeatherDataClient> clients)
         return await Task.WhenAll(tasks);
     }
 
-    public Task<IEnumerable<CurrentWeather>> GetWeatherByCities(
+    public async Task<CurrentWeather> GetWeatherByCity(
         WeatherProvider provider,
-        IEnumerable<City> cities
+        City city
     )
     {
-        throw new NotImplementedException();
+        if (!providers.TryGetValue(provider, out var client))
+        {
+            throw new InvalidOperationException($"Provider {provider} not found");
+        }
+
+        if (!cityMap.TryGetValue(city, out var coords))
+        {
+            throw new InvalidOperationException($"City {city} not supported");
+        }
+
+        var temp = await client.LocationCurrentTemperature(
+            coords.lat,
+            coords.lon
+        );
+
+        return new CurrentWeather(temp);
     }
 }

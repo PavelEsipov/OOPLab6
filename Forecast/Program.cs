@@ -48,6 +48,7 @@ if (app.Environment.IsDevelopment())
 app.MapGroup("/api/v1")
     .MapCurrentWeatherApi()
     .MapForecastApi()
-    .MapMultipleCurrentWeatherApi();
+    .MapMultipleCurrentWeatherApi()
+    .MapCityWeatherApi();
 
 app.Run();
