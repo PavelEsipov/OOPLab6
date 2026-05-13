@@ -60,4 +60,12 @@ public class WeatherHandler(IEnumerable<IWeatherDataClient> clients)
 
         return await Task.WhenAll(tasks);
     }
+
+    public Task<IEnumerable<CurrentWeather>> GetWeatherByCities(
+        WeatherProvider provider,
+        IEnumerable<City> cities
+    )
+    {
+        throw new NotImplementedException();
+    }
 }
