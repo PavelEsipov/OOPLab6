@@ -34,6 +34,23 @@ public static class WeatherApi
         return groups;
     }
 
+    public static RouteGroupBuilder MapMultipleCurrentWeatherApi(this RouteGroupBuilder groups)
+    {
+        groups
+            .MapPost(
+                "weather/multiple",
+                WeatherApi.HandleGetCurrentWeatherMultiple
+            )
+            .WithName("GetCurrentWeatherMultiple")
+            .WithDisplayName("Get Current Weather Multiple")
+            .WithTags(["weather"])
+            .WithDescription(
+                "Returns current weather for multiple locations"
+            );
+
+        return groups;
+    }
+
     private static async Task<
         Results<Ok<Success<CurrentWeather>>, BadRequest<Status>, InternalServerError<Status>>
     > HandleGetCurrentWeather(
@@ -95,6 +112,39 @@ public static class WeatherApi
         catch (ApiCallException e)
         {
             return TypedResults.InternalServerError(Status.Create(500, e.Message));
+        }
+    }
+
+    private static async Task<
+    Results<Ok<Success<IEnumerable<CurrentWeather>>>,BadRequest<Status>,InternalServerError<Status>>
+    > HandleGetCurrentWeatherMultiple(
+        [FromServices] CurrentWeatherController controller,
+        [FromBody] MultipleWeatherRequest request
+    )
+    {
+        try
+        {
+            if (request.Locations.Count == 0)
+            {
+                return TypedResults.BadRequest(
+                    Status.Create(400, "locations cannot be empty")
+                );
+            }
+
+            var result = await controller.GetCurrentWeatherMultiple(
+                request.Provider,
+                request.Locations
+            );
+
+            return TypedResults.Ok(
+                Success.Create(200, "success", result)
+            );
+        }
+        catch (ApiCallException e)
+        {
+            return TypedResults.InternalServerError(
+                Status.Create(500, e.Message)
+            );
         }
     }
 }

@@ -38,11 +38,26 @@ public class WeatherHandler(IEnumerable<IWeatherDataClient> clients)
         return await client.LocationForecast(latitude, longitude);
     }
 
-    public Task<IEnumerable<CurrentWeather>> GetCurrentWeatherMultiple(
+    public async Task<IEnumerable<CurrentWeather>> GetCurrentWeatherMultiple(
         WeatherProvider provider,
         IEnumerable<LocationDto> locations
     )
     {
-        throw new NotImplementedException();
+        if (!providers.TryGetValue(provider, out var client))
+        {
+            throw new InvalidOperationException($"Provider {provider} not found");
+        }
+
+        var tasks = locations.Select(async location =>
+        {
+            var temperature = await client.LocationCurrentTemperature(
+                location.Lat,
+                location.Lon
+            );
+
+            return new CurrentWeather(temperature);
+        });
+
+        return await Task.WhenAll(tasks);
     }
 }

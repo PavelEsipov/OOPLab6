@@ -23,4 +23,12 @@ class CurrentWeatherController(WeatherHandler handler)
     {
         return handler.GetForecast(provider, latitude, longitude);
     }
+
+    public Task<IEnumerable<CurrentWeather>> GetCurrentWeatherMultiple(
+        WeatherProvider provider,
+        IEnumerable<LocationDto> locations
+    )
+    {
+        return handler.GetCurrentWeatherMultiple(provider, locations);
+    }
 }
